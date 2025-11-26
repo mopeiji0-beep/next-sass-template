@@ -1,0 +1,179 @@
+{
+  "home": {
+    "title": "开始使用，请编辑 page.tsx 文件。",
+    "description": "正在寻找起点或更多说明？请访问",
+    "templates": "模板",
+    "or": "或",
+    "learning": "学习",
+    "center": "中心",
+    "deployNow": "立即部署",
+    "documentation": "文档"
+  },
+  "metadata": {
+    "title": "创建 Next 应用",
+    "description": "由 create next app 生成"
+  },
+  "NotFoundPage": {
+    "title": "页面未找到"
+  },
+  "dashboard": {
+    "sidebar": {
+      "brand": "Acme 公司",
+      "navMain": {
+        "dashboard": "仪表板",
+        "systemManagement": "系统管理",
+        "userManagement": "用户管理"
+      },
+      "navSecondary": {
+        "settings": "设置"
+      }
+    },
+    "header": {
+      "dashboard": "仪表板",
+      "userManagement": "用户管理"
+    },
+    "userManagement": {
+      "title": "用户管理",
+      "description": "管理系统中的用户",
+      "addUser": "添加用户",
+      "editUser": "编辑用户",
+      "deleteUser": "删除用户",
+      "enableUser": "启用用户",
+      "disableUser": "禁用用户",
+      "search": "搜索用户...",
+      "name": "姓名",
+      "email": "邮箱",
+      "status": "状态",
+      "active": "启用",
+      "inactive": "禁用",
+      "createdAt": "创建时间",
+      "updatedAt": "更新时间",
+      "actions": "操作",
+      "edit": "编辑",
+      "delete": "删除",
+      "noUsers": "未找到用户",
+      "password": "密码",
+      "confirmPassword": "确认密码",
+      "save": "保存",
+      "cancel": "取消",
+      "create": "创建",
+      "update": "更新",
+      "deleteConfirm": "确定要删除此用户吗？",
+      "deleteSuccess": "用户删除成功",
+      "createSuccess": "用户创建成功",
+      "updateSuccess": "用户更新成功",
+      "toggleSuccess": "用户状态更新成功",
+      "featureComingSoon": "该功能即将上线",
+      "actionsBar": {
+        "refresh": "刷新",
+        "create": "新增",
+        "delete": "删除",
+        "transfer": "转移"
+      },
+      "filters": {
+        "keywordPlaceholder": "搜索用户名、姓名",
+        "status": "状态",
+        "statusAll": "全部",
+        "statusActive": "启用",
+        "statusInactive": "禁用",
+        "dateFrom": "开始日期",
+        "dateTo": "结束日期",
+        "search": "搜索"
+      },
+      "page": "页码",
+      "previous": "上一页",
+      "next": "下一页",
+      "loading": "加载中...",
+      "leaveEmptyToKeep": "留空则不修改",
+      "errors": {
+        "deleteSelf": "不能删除自己的账户",
+        "disableSelf": "不能禁用自己的账户",
+        "userNotFound": "用户未找到",
+        "emailInUse": "邮箱已被使用"
+      }
+    },
+    "cards": {
+      "totalRevenue": {
+        "title": "总收入",
+        "trending": "本月上升趋势",
+        "description": "过去 6 个月的访问者"
+      },
+      "newCustomers": {
+        "title": "新客户",
+        "trending": "本周期下降 20%",
+        "description": "获客需要关注"
+      },
+      "activeAccounts": {
+        "title": "活跃账户",
+        "trending": "用户留存强劲",
+        "description": "参与度超过目标"
+      },
+      "growthRate": {
+        "title": "增长率",
+        "trending": "稳定增长",
+        "description": "符合增长预期"
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "登录",
+      "description": "输入您的邮箱和密码以登录您的账户",
+      "email": "邮箱",
+      "password": "密码",
+      "submit": "登录",
+      "noAccount": "还没有账户？",
+      "signUp": "注册",
+      "forgotPassword": "忘记密码？"
+    },
+    "register": {
+      "title": "创建账户",
+      "description": "输入您的信息以创建账户",
+      "name": "姓名",
+      "email": "邮箱",
+      "password": "密码",
+      "confirmPassword": "确认密码",
+      "submit": "创建账户",
+      "hasAccount": "已有账户？",
+      "signIn": "登录"
+    },
+    "forgotPassword": {
+      "title": "忘记密码",
+      "description": "输入您的邮箱地址，我们将向您发送重置密码的链接",
+      "email": "邮箱",
+      "submit": "发送重置链接",
+      "backToLogin": "返回登录",
+      "checkEmail": "请查看您的邮箱"
+    },
+    "resetPassword": {
+      "title": "重置密码",
+      "description": "输入您的新密码",
+      "password": "新密码",
+      "confirmPassword": "确认新密码",
+      "submit": "重置密码",
+      "backToLogin": "返回登录"
+    },
+    "errors": {
+      "invalidCredentials": "邮箱或密码错误",
+      "userExists": "用户已存在",
+      "passwordMismatch": "密码不匹配",
+      "required": "此字段为必填项",
+      "invalidEmail": "邮箱地址无效",
+      "passwordTooShort": "密码至少需要 6 个字符",
+      "autoLoginFailed": "账户创建成功，但自动登录失败。请手动登录。",
+      "invalidToken": "无效或已过期的重置令牌",
+      "tokenExpired": "重置令牌已过期。请重新申请。",
+      "registrationDisabled": "注册功能当前已禁用",
+      "passwordResetDisabled": "密码重置功能当前已禁用"
+    },
+    "success": {
+      "registerSuccess": "账户创建成功",
+      "resetLinkSent": "密码重置链接已发送到您的邮箱",
+      "passwordReset": "密码已成功重置"
+    },
+    "navUser": {
+      "setting": "设置",
+      "logout": "退出登录"
+    }
+  }
+}
