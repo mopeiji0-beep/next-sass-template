@@ -23,7 +23,10 @@
         "dashboard": "Dashboard",
         "systemManagement": "System Management",
         "userManagement": "User Management",
-        "resourceManagement": "Resource Management"
+        "resourceManagement": "Resource Management",
+        "articleManagement": "Article Management",
+        "articles": "Articles",
+        "articleCategories": "Article Categories"
       }
     },
     "header": {
@@ -170,6 +173,107 @@
         "noFileSelected": "Please select a file"
       }
     },
+    "articleManagement": {
+      "title": "Article Management",
+      "createArticle": "Create Article",
+      "createArticleDescription": "Create a new article",
+      "editArticle": "Edit Article",
+      "editArticleDescription": "Modify article information",
+      "title": "Title",
+      "titleZh": "Chinese Title",
+      "titleEn": "English Title",
+      "contentZh": "Chinese Content",
+      "contentEn": "English Content",
+      "slug": "URL Slug",
+      "category": "Category",
+      "selectCategory": "Select Category",
+      "noCategory": "No Category",
+      "status": "Status",
+      "publish": "Publish",
+      "unpublish": "Unpublish",
+      "published": "Published",
+      "draft": "Draft",
+      "chinese": "Chinese",
+      "english": "English",
+      "contentPlaceholder": "Start typing...",
+      "createdAt": "Created At",
+      "create": "Create",
+      "update": "Update",
+      "cancel": "Cancel",
+      "loading": "Loading...",
+      "createSuccess": "Created successfully",
+      "updateSuccess": "Updated successfully",
+      "deleteSuccess": "Deleted successfully",
+      "togglePublishSuccess": "Publish status updated",
+      "noArticles": "No articles found",
+      "actionsBar": {
+        "refresh": "Refresh",
+        "create": "Create"
+      },
+      "filters": {
+        "keywordPlaceholder": "Search title or slug",
+        "search": "Search"
+      },
+      "errors": {
+        "createFailed": "Create failed",
+        "updateFailed": "Update failed",
+        "deleteFailed": "Delete failed",
+        "togglePublishFailed": "Failed to update publish status",
+        "requiredFields": "Please fill in required fields"
+      },
+      "seo": {
+        "title": "SEO Configuration",
+        "metaTitle": "Meta Title",
+        "metaTitlePlaceholder": "Title for search engines (optional)",
+        "metaDescription": "Meta Description",
+        "metaDescriptionPlaceholder": "Description for search engines (optional)",
+        "metaKeywords": "Meta Keywords",
+        "metaKeywordsPlaceholder": "Keywords, separated by commas (optional)",
+        "ogImage": "Open Graph Image",
+        "ogImagePlaceholder": "Social media sharing image URL (optional)"
+      },
+      "createArticle": "Create Article",
+      "editArticle": "Edit Article",
+      "selectCategory": "Select Category",
+      "noCategory": "No Category"
+    },
+    "articleCategoryManagement": {
+      "title": "Article Category Management",
+      "createCategory": "Create Category",
+      "createCategoryDescription": "Create a new category",
+      "editCategory": "Edit Category",
+      "editCategoryDescription": "Modify category information",
+      "name": "Name",
+      "nameZh": "Chinese Name",
+      "nameEn": "English Name",
+      "slug": "URL Slug",
+      "descriptionZh": "Chinese Description",
+      "descriptionEn": "English Description",
+      "sortOrder": "Sort Order",
+      "createdAt": "Created At",
+      "create": "Create",
+      "update": "Update",
+      "cancel": "Cancel",
+      "loading": "Loading...",
+      "createSuccess": "Created successfully",
+      "updateSuccess": "Updated successfully",
+      "deleteSuccess": "Deleted successfully",
+      "noCategories": "No categories found",
+      "actionsBar": {
+        "refresh": "Refresh",
+        "create": "Create"
+      },
+      "filters": {
+        "keywordPlaceholder": "Search name or slug",
+        "search": "Search"
+      },
+      "errors": {
+        "createFailed": "Create failed",
+        "updateFailed": "Update failed",
+        "deleteFailed": "Delete failed",
+        "requiredFields": "Please fill in required fields"
+      }
+    },
     "cards": {
       "totalRevenue": {
         "title": "Total Revenue",
@@ -253,5 +357,18 @@
         "setting": "Setting",
       "logout": "Log out"
     }
+  },
+  "articles": {
+    "title": "Articles",
+    "readMore": "Read More",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page",
+    "noArticles": "No articles found",
+    "notFound": "Article Not Found",
+    "articleNotFound": "Sorry, the article you are looking for does not exist.",
+    "category": "Category",
+    "selectCategory": "Select Category",
+    "allCategories": "All Categories"
   }
 }

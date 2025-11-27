@@ -23,7 +23,10 @@
         "dashboard": "仪表板",
         "systemManagement": "系统管理",
         "userManagement": "用户管理",
-        "resourceManagement": "资源管理"
+        "resourceManagement": "资源管理",
+        "articleManagement": "文章管理",
+        "articles": "文章管理",
+        "articleCategories": "文章分类"
       },
       "navSecondary": {
         "settings": "设置"
@@ -173,6 +176,107 @@
         "noFileSelected": "请选择文件"
       }
     },
+    "articleManagement": {
+      "title": "文章管理",
+      "createArticle": "创建文章",
+      "createArticleDescription": "创建新文章",
+      "editArticle": "编辑文章",
+      "editArticleDescription": "修改文章信息",
+      "title": "标题",
+      "titleZh": "中文标题",
+      "titleEn": "英文标题",
+      "contentZh": "中文内容",
+      "contentEn": "英文内容",
+      "slug": "URL 别名",
+      "category": "分类",
+      "selectCategory": "选择分类",
+      "noCategory": "无分类",
+      "status": "状态",
+      "publish": "发布",
+      "unpublish": "取消发布",
+      "published": "已发布",
+      "draft": "草稿",
+      "chinese": "中文",
+      "english": "英文",
+      "contentPlaceholder": "开始输入...",
+      "createdAt": "创建时间",
+      "create": "创建",
+      "update": "更新",
+      "cancel": "取消",
+      "loading": "加载中...",
+      "createSuccess": "创建成功",
+      "updateSuccess": "更新成功",
+      "deleteSuccess": "删除成功",
+      "togglePublishSuccess": "发布状态已更新",
+      "noArticles": "暂无文章",
+      "actionsBar": {
+        "refresh": "刷新",
+        "create": "创建"
+      },
+      "filters": {
+        "keywordPlaceholder": "搜索标题或别名",
+        "search": "搜索"
+      },
+      "errors": {
+        "createFailed": "创建失败",
+        "updateFailed": "更新失败",
+        "deleteFailed": "删除失败",
+        "togglePublishFailed": "更新发布状态失败",
+        "requiredFields": "请填写必填字段"
+      },
+      "seo": {
+        "title": "SEO 配置",
+        "metaTitle": "Meta 标题",
+        "metaTitlePlaceholder": "用于搜索引擎的标题（可选）",
+        "metaDescription": "Meta 描述",
+        "metaDescriptionPlaceholder": "用于搜索引擎的描述（可选）",
+        "metaKeywords": "Meta 关键词",
+        "metaKeywordsPlaceholder": "关键词，用逗号分隔（可选）",
+        "ogImage": "Open Graph 图片",
+        "ogImagePlaceholder": "社交媒体分享图片 URL（可选）"
+      },
+      "createArticle": "创建文章",
+      "editArticle": "编辑文章",
+      "selectCategory": "选择分类",
+      "noCategory": "无分类"
+    },
+    "articleCategoryManagement": {
+      "title": "文章分类管理",
+      "createCategory": "创建分类",
+      "createCategoryDescription": "创建新分类",
+      "editCategory": "编辑分类",
+      "editCategoryDescription": "修改分类信息",
+      "name": "名称",
+      "nameZh": "中文名称",
+      "nameEn": "英文名称",
+      "slug": "URL 别名",
+      "descriptionZh": "中文描述",
+      "descriptionEn": "英文描述",
+      "sortOrder": "排序",
+      "createdAt": "创建时间",
+      "create": "创建",
+      "update": "更新",
+      "cancel": "取消",
+      "loading": "加载中...",
+      "createSuccess": "创建成功",
+      "updateSuccess": "更新成功",
+      "deleteSuccess": "删除成功",
+      "noCategories": "暂无分类",
+      "actionsBar": {
+        "refresh": "刷新",
+        "create": "创建"
+      },
+      "filters": {
+        "keywordPlaceholder": "搜索名称或别名",
+        "search": "搜索"
+      },
+      "errors": {
+        "createFailed": "创建失败",
+        "updateFailed": "更新失败",
+        "deleteFailed": "删除失败",
+        "requiredFields": "请填写必填字段"
+      }
+    },
     "cards": {
       "totalRevenue": {
         "title": "总收入",
@@ -256,5 +360,18 @@
       "setting": "设置",
       "logout": "退出登录"
     }
+  },
+  "articles": {
+    "title": "文章列表",
+    "readMore": "阅读更多",
+    "previous": "上一页",
+    "next": "下一页",
+    "page": "第",
+    "noArticles": "暂无文章",
+    "notFound": "文章未找到",
+    "articleNotFound": "抱歉，您访问的文章不存在。",
+    "category": "分类",
+    "selectCategory": "选择分类",
+    "allCategories": "全部分类"
   }
 }

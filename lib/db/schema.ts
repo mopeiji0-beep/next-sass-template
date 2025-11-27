@@ -64,3 +64,38 @@ export const resources = pgTable("resources", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const articleCategories = pgTable("article_categories", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  nameZh: text("name_zh").notNull(),
+  nameEn: text("name_en").notNull(),
+  slug: text("slug").notNull().unique(),
+  descriptionZh: text("description_zh"),
+  descriptionEn: text("description_en"),
+  sortOrder: text("sort_order").default("0").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const articles = pgTable("articles", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  titleZh: text("title_zh").notNull(),
+  titleEn: text("title_en").notNull(),
+  contentZh: text("content_zh").notNull(),
+  contentEn: text("content_en").notNull(),
+  slug: text("slug").notNull().unique(),
+  categoryId: uuid("category_id").references(() => articleCategories.id, { onDelete: "set null" }),
+  authorId: uuid("author_id").references(() => users.id, { onDelete: "set null" }),
+  isPublished: text("is_published").default("false").notNull(), // "true" or "false" as string
+  publishedAt: timestamp("published_at"),
+  // SEO fields
+  metaTitleZh: text("meta_title_zh"),
+  metaTitleEn: text("meta_title_en"),
+  metaDescriptionZh: text("meta_description_zh"),
+  metaDescriptionEn: text("meta_description_en"),
+  metaKeywordsZh: text("meta_keywords_zh"),
+  metaKeywordsEn: text("meta_keywords_en"),
+  ogImage: text("og_image"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+

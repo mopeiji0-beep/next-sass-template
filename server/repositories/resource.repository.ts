@@ -1,6 +1,6 @@
 import { eq, and, desc, like, or, count, type SQL } from "drizzle-orm";
 import { resources } from "@/lib/db/schema";
-import type { db } from "@/lib/db";
+import { db } from "@/lib/db";
 
 export interface ResourceRepository {
   findById(id: string): Promise<ResourceEntity | null>;
@@ -44,10 +44,10 @@ export interface FindResourcesParams {
 }
 
 export class ResourceRepositoryImpl implements ResourceRepository {
-  constructor(private db: typeof db) {}
+  constructor(private dbInstance: typeof db) {}
 
   async findById(id: string): Promise<ResourceEntity | null> {
-    const result = await this.db
+    const result = await this.dbInstance
       .select()
       .from(resources)
       .where(eq(resources.id, id))
@@ -81,7 +81,7 @@ export class ResourceRepositoryImpl implements ResourceRepository {
     }
 
     // Get total count
-    const totalQueryBuilder = this.db.select({ value: count() }).from(resources);
+    const totalQueryBuilder = this.dbInstance.select({ value: count() }).from(resources);
     let totalResult: { value: number }[];
     if (filters.length === 0) {
       totalResult = await totalQueryBuilder;
@@ -94,14 +94,24 @@ export class ResourceRepositoryImpl implements ResourceRepository {
     const total = totalResult[0]?.value ?? 0;
 
     // Get paginated data
-    const dataQueryBuilder = this.db
+    const dataQueryBuilder = this.dbInstance
       .select()
       .from(resources)
       .orderBy(desc(resources.createdAt))
       .limit(pageSize)
       .offset(offset);
 
-    let resourceList: any[];
+    let resourceList: Array<{
+      id: string;
+      fileName: string;
+      filePath: string;
+      fileSize: string;
+      mimeType: string;
+      directory: string;
+      uploadedBy: string | null;
+      createdAt: Date | null;
+      updatedAt: Date | null;
+    }>;
     if (filters.length === 0) {
       resourceList = await dataQueryBuilder;
     } else if (filters.length === 1) {
@@ -117,7 +127,7 @@ export class ResourceRepositoryImpl implements ResourceRepository {
   }
 
   async create(data: CreateResourceData): Promise<ResourceEntity> {
-    const result = await this.db
+    const result = await this.dbInstance
       .insert(resources)
       .values({
         fileName: data.fileName,
@@ -143,7 +153,7 @@ export class ResourceRepositoryImpl implements ResourceRepository {
     if (data.directory) updateData.directory = data.directory;
     if (data.filePath) updateData.filePath = data.filePath;
 
-    const result = await this.db
+    const result = await this.dbInstance
       .update(resources)
       .set(updateData)
       .where(eq(resources.id, id))
@@ -153,7 +163,7 @@ export class ResourceRepositoryImpl implements ResourceRepository {
   }
 
   async delete(id: string): Promise<void> {
-    await this.db.delete(resources).where(eq(resources.id, id));
+    await this.dbInstance.delete(resources).where(eq(resources.id, id));
   }
 
   private mapToEntity(row: {

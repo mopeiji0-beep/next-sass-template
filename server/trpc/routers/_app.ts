@@ -7,6 +7,8 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { UserController } from "@/server/controllers/user.controller";
 import { ResourceController } from "@/server/controllers/resource.controller";
+import { ArticleController } from "@/server/controllers/article.controller";
+import { CategoryController } from "@/server/controllers/category.controller";
 
 export const appRouter = router({
   // Public procedures
@@ -414,6 +416,196 @@ export const appRouter = router({
     .mutation(async ({ ctx, input }) => {
       const controller = new ResourceController(ctx);
       return await controller.deleteResource(input.id);
+    }),
+
+  // Category management procedures
+  getCategories: protectedProcedure
+    .input(
+      z
+        .object({
+          page: z.number().min(1).default(1),
+          pageSize: z.number().min(1).max(100).default(10),
+          search: z.string().optional(),
+        })
+        .optional()
+    )
+    .query(async ({ ctx, input }) => {
+      const controller = new CategoryController(ctx);
+      return await controller.getCategories(input ?? {});
+    }),
+
+  getCategoryById: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const controller = new CategoryController(ctx);
+      return await controller.getCategoryById(input.id);
+    }),
+
+  createCategory: protectedProcedure
+    .input(
+      z.object({
+        nameZh: z.string().min(1),
+        nameEn: z.string().min(1),
+        slug: z.string().min(1),
+        descriptionZh: z.string().optional(),
+        descriptionEn: z.string().optional(),
+        sortOrder: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const controller = new CategoryController(ctx);
+      return await controller.createCategory(input);
+    }),
+
+  updateCategory: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        nameZh: z.string().min(1).optional(),
+        nameEn: z.string().min(1).optional(),
+        slug: z.string().min(1).optional(),
+        descriptionZh: z.string().optional(),
+        descriptionEn: z.string().optional(),
+        sortOrder: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { id, ...updateData } = input;
+      const controller = new CategoryController(ctx);
+      return await controller.updateCategory(id, updateData);
+    }),
+
+  deleteCategory: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const controller = new CategoryController(ctx);
+      return await controller.deleteCategory(input.id);
+    }),
+
+  // Article management procedures
+  getArticles: protectedProcedure
+    .input(
+      z
+        .object({
+          page: z.number().min(1).default(1),
+          pageSize: z.number().min(1).max(100).default(10),
+          search: z.string().optional(),
+          categoryId: z.string().optional(),
+          isPublished: z.boolean().optional(),
+        })
+        .optional()
+    )
+    .query(async ({ ctx, input }) => {
+      const controller = new ArticleController(ctx);
+      return await controller.getArticles(input ?? {});
+    }),
+
+  // Public article procedures
+  getPublishedArticles: publicProcedure
+    .input(
+      z
+        .object({
+          page: z.number().min(1).default(1),
+          pageSize: z.number().min(1).max(100).default(10),
+          search: z.string().optional(),
+          categoryId: z.string().optional(),
+        })
+        .optional()
+    )
+    .query(async ({ ctx, input }) => {
+      const controller = new ArticleController(ctx);
+      return await controller.getArticles({
+        ...(input ?? {}),
+        isPublished: true,
+      });
+    }),
+
+  getArticleById: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const controller = new ArticleController(ctx);
+      return await controller.getArticleById(input.id);
+    }),
+
+  getArticleBySlug: publicProcedure
+    .input(z.object({ slug: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const controller = new ArticleController(ctx);
+      return await controller.getArticleBySlug(input.slug);
+    }),
+
+  createArticle: protectedProcedure
+    .input(
+      z.object({
+        titleZh: z.string().min(1),
+        titleEn: z.string().min(1),
+        contentZh: z.string().min(1),
+        contentEn: z.string().min(1),
+        slug: z.string().min(1),
+        categoryId: z.string().optional(),
+        isPublished: z.boolean().optional(),
+        metaTitleZh: z.string().optional(),
+        metaTitleEn: z.string().optional(),
+        metaDescriptionZh: z.string().optional(),
+        metaDescriptionEn: z.string().optional(),
+        metaKeywordsZh: z.string().optional(),
+        metaKeywordsEn: z.string().optional(),
+        ogImage: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.session.user?.id) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Not authenticated",
+        });
+      }
+
+      const controller = new ArticleController(ctx);
+      return await controller.createArticle({
+        ...input,
+        authorId: ctx.session.user.id,
+      });
+    }),
+
+  updateArticle: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        titleZh: z.string().min(1).optional(),
+        titleEn: z.string().min(1).optional(),
+        contentZh: z.string().min(1).optional(),
+        contentEn: z.string().min(1).optional(),
+        slug: z.string().min(1).optional(),
+        categoryId: z.string().optional(),
+        isPublished: z.boolean().optional(),
+        metaTitleZh: z.string().optional(),
+        metaTitleEn: z.string().optional(),
+        metaDescriptionZh: z.string().optional(),
+        metaDescriptionEn: z.string().optional(),
+        metaKeywordsZh: z.string().optional(),
+        metaKeywordsEn: z.string().optional(),
+        ogImage: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { id, ...updateData } = input;
+      const controller = new ArticleController(ctx);
+      return await controller.updateArticle(id, updateData);
+    }),
+
+  deleteArticle: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const controller = new ArticleController(ctx);
+      return await controller.deleteArticle(input.id);
+    }),
+
+  toggleArticlePublishStatus: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const controller = new ArticleController(ctx);
+      return await controller.togglePublishStatus(input.id);
     }),
 });
 
