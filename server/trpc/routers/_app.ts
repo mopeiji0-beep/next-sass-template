@@ -5,6 +5,7 @@ import { users, passwordResetTokens } from "@/lib/db/schema";
 import { eq, and, gt, gte, lte, desc, like, or, count, type SQL } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
+import { UserController } from "@/server/controllers/user.controller";
 
 export const appRouter = router({
   // Public procedures
@@ -209,25 +210,8 @@ export const appRouter = router({
       });
     }
 
-    const user = await ctx.db
-      .select()
-      .from(users)
-      .where(eq(users.id, ctx.session.user.id))
-      .limit(1);
-
-    if (user.length === 0) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "User not found",
-      });
-    }
-
-    return {
-      id: String(user[0].id),
-      name: user[0].name,
-      email: user[0].email,
-      image: user[0].image || null,
-    };
+    const controller = new UserController(ctx);
+    return await controller.getCurrentUser(ctx.session.user.id);
   }),
 
   // User management procedures
@@ -245,130 +229,15 @@ export const appRouter = router({
         .optional()
     )
     .query(async ({ ctx, input }) => {
-      const page = input?.page ?? 1;
-      const pageSize = input?.pageSize ?? 10;
-      const searchTerm = input?.search?.trim() ?? "";
-      const statusFilter = input?.status ?? "all";
-      const dateFrom = input?.dateFrom;
-      const dateTo = input?.dateTo;
-      const offset = (page - 1) * pageSize;
-
-      const filters: SQL[] = [];
-
-      if (searchTerm) {
-        const searchCondition = or(
-          like(users.name, `%${searchTerm}%`),
-          like(users.email, `%${searchTerm}%`)
-        );
-        if (searchCondition) {
-          filters.push(searchCondition);
-        }
-      }
-
-      if (statusFilter === "active" || statusFilter === "inactive") {
-        filters.push(eq(users.isActive, statusFilter === "active" ? "true" : "false"));
-      }
-
-      if (dateFrom) {
-        const fromDate = new Date(dateFrom);
-        if (!Number.isNaN(fromDate.getTime())) {
-          filters.push(gte(users.createdAt, fromDate));
-        }
-      }
-
-      if (dateTo) {
-        const toDate = new Date(dateTo);
-        if (!Number.isNaN(toDate.getTime())) {
-          toDate.setHours(23, 59, 59, 999);
-          filters.push(lte(users.createdAt, toDate));
-        }
-      }
-
-      const totalQueryBuilder = ctx.db.select({ value: count() }).from(users);
-      let totalResult: { value: number }[];
-      if (filters.length === 0) {
-        totalResult = await totalQueryBuilder;
-      } else if (filters.length === 1) {
-        totalResult = await totalQueryBuilder.where(filters[0]);
-      } else {
-        totalResult = await totalQueryBuilder.where(and(...filters));
-      }
-
-      const total = totalResult[0]?.value ?? 0;
-
-      const dataQueryBuilder = ctx.db
-        .select({
-          id: users.id,
-          name: users.name,
-          email: users.email,
-          image: users.image,
-          isActive: users.isActive,
-          createdAt: users.createdAt,
-          updatedAt: users.updatedAt,
-        })
-        .from(users)
-        .orderBy(desc(users.createdAt))
-        .limit(pageSize)
-        .offset(offset);
-      let userList: {
-        id: string
-        name: string
-        email: string
-        image: string | null
-        isActive: string | null
-        createdAt: Date | null
-        updatedAt: Date | null
-      }[];
-      if (filters.length === 0) {
-        userList = await dataQueryBuilder;
-      } else if (filters.length === 1) {
-        userList = await dataQueryBuilder.where(filters[0]);
-      } else {
-        userList = await dataQueryBuilder.where(and(...filters));
-      }
-
-      return {
-        users: userList.map((user) => ({
-          id: String(user.id),
-          name: user.name,
-          email: user.email,
-          image: user.image || null,
-          isActive: user.isActive === "true",
-          createdAt: user.createdAt,
-          updatedAt: user.updatedAt,
-        })),
-        total,
-        page,
-        pageSize,
-        totalPages: Math.ceil(total / pageSize),
-      };
+      const controller = new UserController(ctx);
+      return await controller.getUsers(input ?? {});
     }),
 
   getUserById: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
-      const user = await ctx.db
-        .select()
-        .from(users)
-        .where(eq(users.id, input.id))
-        .limit(1);
-
-      if (user.length === 0) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "User not found",
-        });
-      }
-
-      return {
-        id: String(user[0].id),
-        name: user[0].name,
-        email: user[0].email,
-        image: user[0].image || null,
-        isActive: user[0].isActive === "true",
-        createdAt: user[0].createdAt,
-        updatedAt: user[0].updatedAt,
-      };
+      const controller = new UserController(ctx);
+      return await controller.getUserById(input.id);
     }),
 
   createUser: protectedProcedure
@@ -380,42 +249,8 @@ export const appRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { name, email, password } = input;
-
-      // Check if user already exists
-      const existingUser = await ctx.db
-        .select()
-        .from(users)
-        .where(eq(users.email, email))
-        .limit(1);
-
-      if (existingUser.length > 0) {
-        throw new TRPCError({
-          code: "CONFLICT",
-          message: "User already exists",
-        });
-      }
-
-      // Hash password
-      const hashedPassword = await bcrypt.hash(password, 10);
-
-      // Create user
-      const newUser = await ctx.db
-        .insert(users)
-        .values({
-          name,
-          email,
-          password: hashedPassword,
-          isActive: "true",
-        })
-        .returning();
-
-      return {
-        id: String(newUser[0].id),
-        name: newUser[0].name,
-        email: newUser[0].email,
-        isActive: newUser[0].isActive === "true",
-      };
+      const controller = new UserController(ctx);
+      return await controller.createUser(input);
     }),
 
   updateUser: protectedProcedure
@@ -429,120 +264,28 @@ export const appRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const { id, name, password } = input;
-
-      // Check if user exists
-      const existingUser = await ctx.db
-        .select()
-        .from(users)
-        .where(eq(users.id, id))
-        .limit(1);
-
-      if (existingUser.length === 0) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "User not found",
-        });
-      }
-
-      // Prepare update data - email 不允许修改
-      const updateData: {
-        name?: string;
-        password?: string;
-        updatedAt?: Date;
-      } = {
-        updatedAt: new Date(),
-      };
-
+      const controller = new UserController(ctx);
+      const updateData: { name?: string; password?: string } = {};
       if (name) updateData.name = name;
-      // email 不允许修改，即使传递了也不会更新
-      if (password) {
-        updateData.password = await bcrypt.hash(password, 10);
-      }
-
-      // Update user
-      const updatedUser = await ctx.db
-        .update(users)
-        .set(updateData)
-        .where(eq(users.id, id))
-        .returning();
-
-      return {
-        id: String(updatedUser[0].id),
-        name: updatedUser[0].name,
-        email: updatedUser[0].email,
-        isActive: updatedUser[0].isActive === "true",
-      };
+      if (password) updateData.password = password;
+      return await controller.updateUser(id, updateData);
     }),
 
   deleteUser: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      // Prevent deleting yourself
-      if (ctx.session.user?.id === input.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Cannot delete your own account",
-        });
-      }
-
-      // Check if user exists
-      const existingUser = await ctx.db
-        .select()
-        .from(users)
-        .where(eq(users.id, input.id))
-        .limit(1);
-
-      if (existingUser.length === 0) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "User not found",
-        });
-      }
-
-      // Delete user
-      await ctx.db.delete(users).where(eq(users.id, input.id));
-
-      return { success: true };
+      const controller = new UserController(ctx);
+      return await controller.deleteUser(input.id, ctx.session.user?.id);
     }),
 
   toggleUserStatus: protectedProcedure
     .input(z.object({ id: z.string(), isActive: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
-      // Prevent disabling yourself
-      if (ctx.session.user?.id === input.id && !input.isActive) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Cannot disable your own account",
-        });
-      }
-
-      // Check if user exists
-      const existingUser = await ctx.db
-        .select()
-        .from(users)
-        .where(eq(users.id, input.id))
-        .limit(1);
-
-      if (existingUser.length === 0) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "User not found",
-        });
-      }
-
-      // Update user status
-      const updatedUser = await ctx.db
-        .update(users)
-        .set({
-          isActive: input.isActive ? "true" : "false",
-          updatedAt: new Date(),
-        })
-        .where(eq(users.id, input.id))
-        .returning();
-
+      const controller = new UserController(ctx);
+      const user = await controller.toggleUserStatus(input.id, input.isActive, ctx.session.user?.id);
       return {
-        id: String(updatedUser[0].id),
-        isActive: updatedUser[0].isActive === "true",
+        id: user.id,
+        isActive: user.isActive,
       };
     }),
 
@@ -555,35 +298,8 @@ export const appRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { userId, password } = input;
-
-      // Check if user exists
-      const existingUser = await ctx.db
-        .select()
-        .from(users)
-        .where(eq(users.id, userId))
-        .limit(1);
-
-      if (existingUser.length === 0) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "User not found",
-        });
-      }
-
-      // Hash new password
-      const hashedPassword = await bcrypt.hash(password, 10);
-
-      // Update user password
-      await ctx.db
-        .update(users)
-        .set({
-          password: hashedPassword,
-          updatedAt: new Date(),
-        })
-        .where(eq(users.id, userId));
-
-      return { success: true };
+      const controller = new UserController(ctx);
+      return await controller.changeUserPassword(input.userId, input.password);
     }),
 
   // Update current user profile
@@ -602,32 +318,8 @@ export const appRouter = router({
         });
       }
 
-      const { name } = input;
-
-      // Prepare update data - email 不允许修改
-      const updateData: {
-        name?: string;
-        updatedAt?: Date;
-      } = {
-        updatedAt: new Date(),
-      };
-
-      if (name) updateData.name = name;
-      // email 不允许修改，即使传递了也不会更新
-
-      // Update user
-      const updatedUser = await ctx.db
-        .update(users)
-        .set(updateData)
-        .where(eq(users.id, ctx.session.user.id))
-        .returning();
-
-      return {
-        id: String(updatedUser[0].id),
-        name: updatedUser[0].name,
-        email: updatedUser[0].email,
-        image: updatedUser[0].image || null,
-      };
+      const controller = new UserController(ctx);
+      return await controller.updateCurrentUser(ctx.session.user.id, input);
     }),
 
   // Change current user password
@@ -646,48 +338,12 @@ export const appRouter = router({
         });
       }
 
-      const { currentPassword, newPassword } = input;
-
-      // Get current user
-      const user = await ctx.db
-        .select()
-        .from(users)
-        .where(eq(users.id, ctx.session.user.id))
-        .limit(1);
-
-      if (user.length === 0) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "User not found",
-        });
-      }
-
-      // Verify current password
-      const isPasswordValid = await bcrypt.compare(
-        currentPassword,
-        user[0].password
+      const controller = new UserController(ctx);
+      return await controller.changeCurrentUserPassword(
+        ctx.session.user.id,
+        input.currentPassword,
+        input.newPassword
       );
-
-      if (!isPasswordValid) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Current password is incorrect",
-        });
-      }
-
-      // Hash new password
-      const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-      // Update user password
-      await ctx.db
-        .update(users)
-        .set({
-          password: hashedPassword,
-          updatedAt: new Date(),
-        })
-        .where(eq(users.id, ctx.session.user.id));
-
-      return { success: true };
     }),
 });
 

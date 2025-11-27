@@ -3,28 +3,15 @@
 import * as React from "react"
 import { useTranslations } from "next-intl"
 import { trpc } from "@/lib/trpc/client"
-import { Button } from "@/components/ui/button"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Skeleton } from "@/components/ui/skeleton"
+import { Button } from "@/components/ui/button"
 import { UserManagementDrawer } from "@/components/user/user-management-drawer"
 import { ChangePasswordDialog } from "@/components/user/change-password-dialog"
-import { ToolbarWithFilters, type SearchFiltersState, type ToolbarButtonConfig, type StatusOption } from "@/components/common/toolbar-with-filters"
+import { CrudTable, type CrudTableColumn } from "@/components/common/crud-table"
+import type { SearchFiltersState, ToolbarButtonConfig, StatusOption } from "@/components/common/toolbar-with-filters"
 import {
   IconPlus,
-  IconEdit,
-  IconTrash,
-  IconUserCheck,
-  IconUserX,
   IconRefresh,
-  IconLoader2,
   IconKey,
 } from "@tabler/icons-react"
 import { toast } from "sonner"
@@ -34,6 +21,15 @@ const defaultFilters: SearchFiltersState = {
   status: "all",
   dateFrom: "",
   dateTo: "",
+}
+
+type User = {
+  id: string
+  name: string
+  email: string
+  isActive: boolean
+  createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export default function UsersPage() {
@@ -75,18 +71,16 @@ export default function UsersPage() {
     },
   })
 
-  const handleDelete = (id: string) => {
-    if (confirm(t("deleteConfirm"))) {
-      deleteUserMutation.mutate({ id })
-    }
+  const handleDelete = (user: User) => {
+    deleteUserMutation.mutate({ id: user.id })
   }
 
-  const handleToggleStatus = (id: string, isActive: boolean) => {
-    toggleUserStatusMutation.mutate({ id, isActive: !isActive })
+  const handleToggleStatus = (user: User) => {
+    toggleUserStatusMutation.mutate({ id: user.id, isActive: !user.isActive })
   }
 
-  const handleEdit = (id: string) => {
-    setEditingUser(id)
+  const handleEdit = (user: User) => {
+    setEditingUser(user.id)
     setDrawerOpen(true)
   }
 
@@ -101,8 +95,8 @@ export default function UsersPage() {
     refetch()
   }
 
-  const handleChangePassword = (id: string) => {
-    setChangingPasswordUserId(id)
+  const handleChangePassword = (user: User) => {
+    setChangingPasswordUserId(user.id)
     setChangePasswordOpen(true)
   }
 
@@ -148,153 +142,73 @@ export default function UsersPage() {
     search: t("filters.search"),
   }
 
-  const isInitialLoading = isLoading && !data
-  const isRefetching = isFetching && !!data
-
-  if (isInitialLoading) {
-    return (
-      <div className="flex flex-col gap-4 p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <Skeleton className="h-8 w-48 mb-2" />
-            <Skeleton className="h-4 w-64" />
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <Skeleton className="h-10 flex-1" />
-          <Skeleton className="h-10 w-32" />
-        </div>
-        <div className="space-y-2">
-          {[...Array(5)].map((_, i) => (
-            <Skeleton key={i} className="h-12 w-full" />
-          ))}
-        </div>
-      </div>
-    )
-  }
+  const columns: CrudTableColumn<User>[] = [
+    {
+      key: "name",
+      header: t("name"),
+      accessor: (user) => <span className="font-medium">{user.name}</span>,
+    },
+    {
+      key: "email",
+      header: t("email"),
+      accessor: (user) => user.email,
+    },
+    {
+      key: "status",
+      header: t("status"),
+      accessor: (user) => (
+        <Badge variant={user.isActive ? "default" : "secondary"}>
+          {user.isActive ? t("active") : t("inactive")}
+        </Badge>
+      ),
+    },
+    {
+      key: "createdAt",
+      header: t("createdAt"),
+      accessor: (user) => (
+        user.createdAt
+          ? new Date(user.createdAt).toLocaleDateString()
+          : "--"
+      ),
+    },
+  ]
 
   return (
-    <div className="flex flex-col gap-4 p-6">
-
-      <ToolbarWithFilters
-        buttons={toolbarButtons}
+    <>
+      <CrudTable
+        data={data?.users}
+        isLoading={isLoading}
+        isFetching={isFetching}
+        columns={columns}
+        page={data?.page || page}
+        totalPages={data?.totalPages || 1}
+        onPageChange={setPage}
         filters={filters}
         onFiltersChange={setFilters}
         onSearch={handleSearch}
-        labels={toolbarLabels}
-        isSearching={isFetching && !isLoading}
-      />
-
-      <div className="relative rounded-md border">
-        {isRefetching && (
-          <div className="bg-background/80 absolute inset-0 z-10 flex items-center justify-center">
-            <IconLoader2 className="text-muted-foreground h-5 w-5 animate-spin" />
-          </div>
+        statusOptions={statusOptions}
+        toolbarLabels={toolbarLabels}
+        toolbarButtons={toolbarButtons}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onToggleStatus={handleToggleStatus}
+        getRowId={(user) => user.id}
+        getRowStatus={(user) => ({
+          isActive: user.isActive,
+          label: user.isActive ? t("disableUser") : t("enableUser"),
+        })}
+        customActions={(user) => (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleChangePassword(user)}
+            title={t("changePassword")}
+          >
+            <IconKey className="h-4 w-4" />
+          </Button>
         )}
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t("name")}</TableHead>
-              <TableHead>{t("email")}</TableHead>
-              <TableHead>{t("status")}</TableHead>
-              <TableHead>{t("createdAt")}</TableHead>
-              <TableHead className="text-right">{t("actions")}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {data?.users.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center text-muted-foreground">
-                  {t("noUsers")}
-                </TableCell>
-              </TableRow>
-            ) : (
-              data?.users.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell className="font-medium">{user.name}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>
-                    <Badge variant={user.isActive ? "default" : "secondary"}>
-                      {user.isActive ? t("active") : t("inactive")}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {user.createdAt
-                      ? new Date(user.createdAt).toLocaleDateString()
-                      : "--"}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEdit(user.id)}
-                        title={t("edit")}
-                      >
-                        <IconEdit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleChangePassword(user.id)}
-                        title={t("changePassword")}
-                      >
-                        <IconKey className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleToggleStatus(user.id, user.isActive)}
-                        title={user.isActive ? t("disableUser") : t("enableUser")}
-                      >
-                        {user.isActive ? (
-                          <IconUserX className="h-4 w-4" />
-                        ) : (
-                          <IconUserCheck className="h-4 w-4" />
-                        )}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(user.id)}
-                        title={t("delete")}
-                      >
-                        <IconTrash className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
-
-      {data && data.totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-muted-foreground">
-            {t("page")} {data.page} / {data.totalPages}
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-            >
-              {t("previous")}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPage((p) => Math.min(data.totalPages, p + 1))}
-              disabled={page === data.totalPages}
-            >
-              {t("next")}
-            </Button>
-          </div>
-        </div>
-      )}
+        emptyMessage={t("noUsers")}
+      />
 
       <UserManagementDrawer
         open={drawerOpen}
@@ -311,7 +225,6 @@ export default function UsersPage() {
           onSuccess={handleChangePasswordClose}
         />
       )}
-    </div>
+    </>
   )
 }
-
