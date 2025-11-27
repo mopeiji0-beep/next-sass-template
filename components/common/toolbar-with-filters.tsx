@@ -144,7 +144,7 @@ export function ToolbarWithFilters({
   }
 
   return (
-    <div className="flex flex-col gap-4 rounded-lg border bg-card/50 p-4 shadow-sm md:flex-row md:items-center md:justify-between">
+    <div className="flex flex-col gap-4 rounded-lg border bg-card/50 p-4 shadow-sm md:flex-row md:items-end md:justify-between">
       <div className="flex flex-wrap gap-2">
         {buttons.map((button) => {
           const IconComponent = button.icon
