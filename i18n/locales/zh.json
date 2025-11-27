@@ -22,7 +22,8 @@
       "navMain": {
         "dashboard": "仪表板",
         "systemManagement": "系统管理",
-        "userManagement": "用户管理"
+        "userManagement": "用户管理",
+        "resourceManagement": "资源管理"
       },
       "navSecondary": {
         "settings": "设置"
@@ -124,6 +125,52 @@
         "incorrectCurrentPassword": "当前密码不正确",
         "changePasswordFailed": "密码修改失败",
         "currentPasswordRequired": "请输入当前密码"
+      }
+    },
+    "resourceManagement": {
+      "title": "资源管理",
+      "uploadResource": "上传资源",
+      "uploadResourceDescription": "上传文件到服务器",
+      "editResource": "编辑资源",
+      "editResourceDescription": "修改资源信息",
+      "file": "文件",
+      "directory": "目录",
+      "rootDirectory": "根目录",
+      "uploadDirectory": "上传目录",
+      "allDirectories": "所有目录",
+      "fileName": "文件名",
+      "fileSize": "文件大小",
+      "mimeType": "文件类型",
+      "fileInfo": "文件信息",
+      "selectedFile": "已选择文件",
+      "upload": "上传",
+      "uploading": "上传中...",
+      "update": "更新",
+      "cancel": "取消",
+      "loading": "加载中...",
+      "download": "下载",
+      "preview": "预览",
+      "uploadSuccess": "上传成功",
+      "updateSuccess": "更新成功",
+      "deleteSuccess": "删除成功",
+      "noResources": "暂无资源",
+      "createdAt": "创建时间",
+      "actionsBar": {
+        "refresh": "刷新",
+        "upload": "上传"
+      },
+      "filters": {
+        "keywordPlaceholder": "搜索文件名",
+        "status": "状态",
+        "dateFrom": "开始日期",
+        "dateTo": "结束日期",
+        "search": "搜索"
+      },
+      "errors": {
+        "uploadFailed": "上传失败",
+        "updateFailed": "更新失败",
+        "deleteFailed": "删除失败",
+        "noFileSelected": "请选择文件"
       }
     },
     "cards": {

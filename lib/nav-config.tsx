@@ -3,6 +3,7 @@ import {
   IconDashboard,
   IconSettings,
   IconUsers,
+  IconFileUpload,
 } from "@tabler/icons-react"
 import { type NavTreeItem } from "@/components/dashboard/nav-tree"
 
@@ -27,6 +28,11 @@ const NAV_CONFIG: NavConfigItem[] = [
         titleKey: "dashboard.sidebar.navMain.userManagement",
         url: "/dashboard/users",
         icon: IconUsers,
+      },
+      {
+        titleKey: "dashboard.sidebar.navMain.resourceManagement",
+        url: "/dashboard/resources",
+        icon: IconFileUpload,
       },
     ],
   },

@@ -1,0 +1,228 @@
+---
+alwaysApply: true
+---
+
+# Cursor Rules for Next.js Full Stack Template
+
+## 项目概述
+这是一个基于 Next.js 16 的全栈项目，采用三层架构（Repository/Service/Controller），使用 tRPC 作为 API 层，PostgreSQL + Drizzle ORM 作为数据库层。
+
+## 架构规则
+
+### 三层架构
+项目严格遵循三层架构模式，所有服务器端代码必须按照以下层次组织：
+
+1. **Repository 层** (`server/repositories/`)
+   - 职责：数据访问，封装所有数据库操作
+   - 命名：`{Entity}Repository` 接口，`{Entity}RepositoryImpl` 实现类
+   - 规则：
+     - 只包含数据库操作，不包含业务逻辑
+     - 返回 Entity 类型，不返回 DTO
+     - 使用 Drizzle ORM 进行数据库查询
+     - 必须实现对应的 Repository 接口
+
+2. **Service 层** (`server/services/`)
+   - 职责：业务逻辑，数据验证，权限检查
+   - 命名：`{Entity}Service` 类
+   - 规则：
+     - 依赖 Repository 接口，不直接依赖实现
+     - 包含所有业务逻辑（密码加密、数据验证等）
+     - 处理错误并抛出 TRPCError
+     - 返回清理后的数据（不包含敏感信息如密码）
+
+3. **Controller 层** (`server/controllers/`)
+   - 职责：路由处理，调用 Service
+   - 命名：`{Entity}Controller` 类
+   - 规则：
+     - 在构造函数中初始化 Repository 和 Service
+     - 方法直接调用 Service，不做业务逻辑处理
+     - 接收 Context 作为构造函数参数
+
+### tRPC 路由
+- 位置：`server/trpc/routers/_app.ts`
+- 规则：
+  - 所有路由必须通过 Controller 调用 Service
+  - 使用 `protectedProcedure` 保护需要认证的路由
+  - 使用 `publicProcedure` 标记公开路由
+  - 输入验证使用 Zod schema
+  - 错误处理由 Service 层抛出，路由层不处理业务逻辑
+
+## 前端规则
+
+### 组件组织
+- 通用组件：`components/common/` - 可复用的通用组件
+- 功能组件：`components/{feature}/` - 特定功能的组件
+- Dashboard 组件：`components/dashboard/` - Dashboard 相关组件
+
+### CRUD 组件使用
+- 所有列表页面优先使用 `CrudTable` 组件
+- 配置列定义使用 `CrudTableColumn` 类型
+- 自定义操作使用 `customActions` 属性
+- 状态切换使用 `onToggleStatus` 和 `getRowStatus`
+
+### 客户端组件
+- 所有使用 Hooks 的组件必须标记 `"use client"`
+- 使用 `useTranslations` 进行国际化
+- 使用 `trpc` 客户端进行数据获取
+
+### 类型安全
+- 所有组件使用 TypeScript 严格模式
+- 使用泛型提高组件复用性
+- 定义清晰的接口和类型
+
+## 代码风格
+
+### TypeScript
+- 使用严格模式 (`strict: true`)
+- 优先使用接口而非类型别名（用于对象类型）
+- 使用 `type` 用于联合类型、交叉类型等
+- 函数参数和返回值必须明确类型
+
+### React
+- 优先使用函数式组件
+- 使用 Hooks 管理状态和副作用
+- 组件 Props 必须定义类型
+- 使用 `React.useState`, `React.useEffect` 等
+
+### 命名规范
+- 组件：PascalCase (`UserManagement`)
+- 函数/变量：camelCase (`getUserById`)
+- 常量：UPPER_SNAKE_CASE (`MAX_RETRY_COUNT`)
+- 文件：与导出的主要内容同名
+
+### 导入顺序
+1. React 相关
+2. 第三方库
+3. 内部组件
+4. 工具函数
+5. 类型定义
+6. 样式
+
+## 数据库规则
+
+### Schema 定义
+- 位置：`lib/db/schema.ts`
+- 使用 Drizzle ORM 定义表结构
+- 所有表必须包含 `id`, `createdAt`, `updatedAt` 字段
+
+### 迁移
+- 使用 `pnpm db:generate` 生成迁移文件
+- 使用 `pnpm db:push` 推送 schema（开发环境）
+- 使用 `pnpm db:migrate` 运行迁移（生产环境）
+
+## 国际化规则
+
+### 翻译文件
+- 位置：`i18n/locales/`
+- 支持语言：`zh.json` (中文), `en.json` (英文)
+- 结构：按功能模块组织，如 `dashboard.userManagement`
+
+### 使用翻译
+- 客户端组件：`useTranslations("namespace")`
+- 服务器组件：使用 `getTranslations` (如果支持)
+- 所有用户可见文本必须使用翻译
+
+## 错误处理
+
+### 服务器端
+- Service 层抛出 `TRPCError`
+- 使用适当的错误代码：`NOT_FOUND`, `CONFLICT`, `UNAUTHORIZED`, `FORBIDDEN`
+- 错误消息使用翻译键（如果可能）
+
+### 客户端
+- 使用 `toast` 显示错误消息
+- 错误消息从翻译文件获取
+- 提供用户友好的错误提示
+
+## 安全规则
+
+### 认证
+- 所有需要认证的路由使用 `protectedProcedure`
+- 检查 `ctx.session.user?.id` 验证用户身份
+- 防止用户删除/禁用自己的账户
+
+### 数据验证
+- 所有输入使用 Zod schema 验证
+- 密码长度至少 6 个字符
+- Email 格式验证
+- 防止 SQL 注入（使用 Drizzle ORM 参数化查询）
+
+### 敏感信息
+- 密码必须加密存储（使用 bcrypt）
+- 不在响应中返回密码字段
+- 使用 `sanitizeUser` 方法清理敏感数据
+
+## 性能优化
+
+### 数据库查询
+- 使用分页避免加载大量数据
+- 使用索引优化查询性能
+- 避免 N+1 查询问题
+
+### 前端优化
+- 使用 React Query 缓存数据
+- 实现加载状态和骨架屏
+- 使用 `isFetching` 和 `isLoading` 区分加载状态
+
+## 测试建议
+
+### 单元测试
+- Repository 层：测试数据库操作
+- Service 层：测试业务逻辑
+- Controller 层：测试路由处理
+
+### 集成测试
+- 测试完整的 API 流程
+- 测试认证和授权
+- 测试错误处理
+
+## 常见模式
+
+### 创建新的 CRUD 功能
+1. 在 `server/repositories/` 创建 Repository
+2. 在 `server/services/` 创建 Service
+3. 在 `server/controllers/` 创建 Controller
+4. 在 `server/trpc/routers/_app.ts` 添加路由
+5. 在 `app/[locale]/dashboard/` 创建页面
+6. 使用 `CrudTable` 组件显示列表
+7. 在 `i18n/locales/` 添加翻译
+
+### 添加新的 API 端点
+1. 在对应的 Service 中添加方法
+2. 在对应的 Controller 中添加方法
+3. 在 tRPC 路由中添加 endpoint
+4. 使用 Zod 定义输入 schema
+5. 处理错误和边界情况
+
+## 禁止事项
+
+- ❌ 在 Controller 中直接访问数据库
+- ❌ 在 Service 中直接使用 `ctx.db`
+- ❌ 在 Repository 中包含业务逻辑
+- ❌ 在组件中直接操作数据库
+- ❌ 硬编码用户可见文本
+- ❌ 在响应中返回密码等敏感信息
+- ❌ 跳过输入验证
+- ❌ 使用 `any` 类型（除非必要）
+
+## 最佳实践
+
+- ✅ 使用接口定义契约
+- ✅ 依赖注入而非直接实例化
+- ✅ 单一职责原则
+- ✅ 错误处理要完善
+- ✅ 代码要有注释（复杂逻辑）
+- ✅ 使用类型而非断言
+- ✅ 保持函数小而专注
+- ✅ 优先使用现有组件和工具
+
+## AI 助手提示
+
+当使用 AI 助手时，请：
+1. 遵循三层架构模式
+2. 使用现有的组件和工具
+3. 保持代码风格一致
+4. 添加必要的类型定义
+5. 考虑国际化和错误处理
+6. 遵循安全最佳实践
+

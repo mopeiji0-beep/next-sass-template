@@ -22,7 +22,8 @@
       "navMain": {
         "dashboard": "Dashboard",
         "systemManagement": "System Management",
-        "userManagement": "User Management"
+        "userManagement": "User Management",
+        "resourceManagement": "Resource Management"
       }
     },
     "header": {
@@ -121,6 +122,52 @@
         "incorrectCurrentPassword": "Current password is incorrect",
         "changePasswordFailed": "Failed to change password",
         "currentPasswordRequired": "Current password is required"
+      }
+    },
+    "resourceManagement": {
+      "title": "Resource Management",
+      "uploadResource": "Upload Resource",
+      "uploadResourceDescription": "Upload file to server",
+      "editResource": "Edit Resource",
+      "editResourceDescription": "Modify resource information",
+      "file": "File",
+      "directory": "Directory",
+      "rootDirectory": "Root Directory",
+      "uploadDirectory": "Upload Directory",
+      "allDirectories": "All Directories",
+      "fileName": "File Name",
+      "fileSize": "File Size",
+      "mimeType": "MIME Type",
+      "fileInfo": "File Information",
+      "selectedFile": "Selected File",
+      "upload": "Upload",
+      "uploading": "Uploading...",
+      "update": "Update",
+      "cancel": "Cancel",
+      "loading": "Loading...",
+      "download": "Download",
+      "preview": "Preview",
+      "uploadSuccess": "Uploaded successfully",
+      "updateSuccess": "Updated successfully",
+      "deleteSuccess": "Deleted successfully",
+      "noResources": "No resources found",
+      "createdAt": "Created At",
+      "actionsBar": {
+        "refresh": "Refresh",
+        "upload": "Upload"
+      },
+      "filters": {
+        "keywordPlaceholder": "Search file name",
+        "status": "Status",
+        "dateFrom": "Start date",
+        "dateTo": "End date",
+        "search": "Search"
+      },
+      "errors": {
+        "uploadFailed": "Upload failed",
+        "updateFailed": "Update failed",
+        "deleteFailed": "Delete failed",
+        "noFileSelected": "Please select a file"
       }
     },
     "cards": {

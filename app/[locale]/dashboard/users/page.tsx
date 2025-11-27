@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { UserManagementDrawer } from "@/components/user/user-management-drawer"
 import { ChangePasswordDialog } from "@/components/user/change-password-dialog"
 import { CrudTable, type CrudTableColumn } from "@/components/common/crud-table"
-import type { SearchFiltersState, ToolbarButtonConfig, StatusOption } from "@/components/common/toolbar-with-filters"
+import type { SearchFiltersState, ToolbarButtonConfig, FilterFieldConfig, StatusOption } from "@/components/common/toolbar-with-filters"
 import {
   IconPlus,
   IconRefresh,
@@ -46,7 +46,7 @@ export default function UsersPage() {
     page,
     pageSize: 10,
     search: appliedFilters.keyword || undefined,
-    status: appliedFilters.status !== "all" ? appliedFilters.status : undefined,
+    status: appliedFilters.status && appliedFilters.status !== "all" ? (appliedFilters.status as "active" | "inactive") : undefined,
     dateFrom: appliedFilters.dateFrom || undefined,
     dateTo: appliedFilters.dateTo || undefined,
   })
@@ -133,12 +133,27 @@ export default function UsersPage() {
     { value: "inactive", label: t("filters.statusInactive") },
   ]
 
+  const filterFields: FilterFieldConfig[] = [
+    {
+      type: "date",
+      key: "dateFrom",
+      label: t("filters.dateFrom"),
+    },
+    {
+      type: "date",
+      key: "dateTo",
+      label: t("filters.dateTo"),
+    },
+    {
+      type: "select",
+      key: "status",
+      label: t("filters.status"),
+      options: statusOptions,
+    },
+  ]
+
   const toolbarLabels = {
     keywordPlaceholder: t("filters.keywordPlaceholder"),
-    statusLabel: t("filters.status"),
-    statusOptions,
-    dateFrom: t("filters.dateFrom"),
-    dateTo: t("filters.dateTo"),
     search: t("filters.search"),
   }
 
@@ -186,8 +201,8 @@ export default function UsersPage() {
         filters={filters}
         onFiltersChange={setFilters}
         onSearch={handleSearch}
-        statusOptions={statusOptions}
         toolbarLabels={toolbarLabels}
+        filterFields={filterFields}
         toolbarButtons={toolbarButtons}
         onEdit={handleEdit}
         onDelete={handleDelete}

@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { ToolbarWithFilters, type SearchFiltersState, type ToolbarButtonConfig, type StatusOption } from "@/components/common/toolbar-with-filters"
+import { ToolbarWithFilters, type SearchFiltersState, type ToolbarButtonConfig, type FilterFieldConfig } from "@/components/common/toolbar-with-filters"
 import {
   IconEdit,
   IconTrash,
@@ -47,13 +47,9 @@ export interface CrudTableProps<T> {
   filters?: SearchFiltersState
   onFiltersChange?: (filters: SearchFiltersState) => void
   onSearch?: () => void
-  statusOptions?: StatusOption[]
+  filterFields?: FilterFieldConfig[]
   toolbarLabels?: {
     keywordPlaceholder: string
-    statusLabel: string
-    statusOptions: StatusOption[]
-    dateFrom: string
-    dateTo: string
     search: string
   }
   
@@ -75,7 +71,7 @@ export interface CrudTableProps<T> {
   loadingRows?: number
 }
 
-export function CrudTable<T extends Record<string, any>>({
+export function CrudTable<T extends Record<string, unknown>>({
   data = [],
   isLoading = false,
   isFetching = false,
@@ -87,7 +83,7 @@ export function CrudTable<T extends Record<string, any>>({
   filters,
   onFiltersChange,
   onSearch,
-  statusOptions,
+  filterFields,
   toolbarLabels,
   toolbarButtons = [],
   onEdit,
@@ -142,12 +138,9 @@ export function CrudTable<T extends Record<string, any>>({
           onSearch={onSearch || (() => {})}
           labels={toolbarLabels || {
             keywordPlaceholder: "",
-            statusLabel: "",
-            statusOptions: [],
-            dateFrom: "",
-            dateTo: "",
             search: "",
           }}
+          filterFields={filterFields}
           isSearching={isFetching && !isLoading}
         />
       )}

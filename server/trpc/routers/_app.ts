@@ -2,10 +2,11 @@ import { router, publicProcedure, protectedProcedure } from "../init";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { users, passwordResetTokens } from "@/lib/db/schema";
-import { eq, and, gt, gte, lte, desc, like, or, count, type SQL } from "drizzle-orm";
+import { eq, and, gt } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { UserController } from "@/server/controllers/user.controller";
+import { ResourceController } from "@/server/controllers/resource.controller";
 
 export const appRouter = router({
   // Public procedures
@@ -344,6 +345,75 @@ export const appRouter = router({
         input.currentPassword,
         input.newPassword
       );
+    }),
+
+  // Resource management procedures
+  getResources: protectedProcedure
+    .input(
+      z
+        .object({
+          page: z.number().min(1).default(1),
+          pageSize: z.number().min(1).max(100).default(10),
+          search: z.string().optional(),
+          directory: z.enum(["root", "upload", "all"]).optional(),
+        })
+        .optional()
+    )
+    .query(async ({ ctx, input }) => {
+      const controller = new ResourceController(ctx);
+      return await controller.getResources(input ?? {});
+    }),
+
+  getResourceById: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const controller = new ResourceController(ctx);
+      return await controller.getResourceById(input.id);
+    }),
+
+  createResource: protectedProcedure
+    .input(
+      z.object({
+        fileName: z.string().min(1),
+        filePath: z.string().min(1),
+        fileSize: z.string().min(1),
+        mimeType: z.string().min(1),
+        directory: z.enum(["root", "upload"]),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.session.user?.id) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Not authenticated",
+        });
+      }
+
+      const controller = new ResourceController(ctx);
+      return await controller.createResource({
+        ...input,
+        uploadedBy: ctx.session.user.id,
+      });
+    }),
+
+  updateResource: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        directory: z.enum(["root", "upload"]).optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { id, ...updateData } = input;
+      const controller = new ResourceController(ctx);
+      return await controller.updateResource(id, updateData);
+    }),
+
+  deleteResource: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const controller = new ResourceController(ctx);
+      return await controller.deleteResource(input.id);
     }),
 });
 

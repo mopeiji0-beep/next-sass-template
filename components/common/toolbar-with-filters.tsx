@@ -28,15 +28,32 @@ export type ToolbarButtonConfig = {
 
 export type SearchFiltersState = {
   keyword: string
-  status: "all" | "active" | "inactive"
-  dateFrom?: string
-  dateTo?: string
+  [key: string]: string | undefined
 }
 
 export type StatusOption = {
-  value: SearchFiltersState["status"]
+  value: string
   label: string
 }
+
+export type FilterFieldConfig = 
+  | {
+      type: "date"
+      key: string
+      label: string
+    }
+  | {
+      type: "select"
+      key: string
+      label: string
+      options: StatusOption[]
+    }
+  | {
+      type: "text"
+      key: string
+      label: string
+      placeholder?: string
+    }
 
 interface ToolbarWithFiltersProps {
   buttons: ToolbarButtonConfig[]
@@ -45,12 +62,9 @@ interface ToolbarWithFiltersProps {
   onSearch: () => void
   labels: {
     keywordPlaceholder: string
-    statusLabel: string
-    statusOptions: StatusOption[]
-    dateFrom: string
-    dateTo: string
     search: string
   }
+  filterFields?: FilterFieldConfig[]
   isSearching?: boolean
 }
 
@@ -60,13 +74,73 @@ export function ToolbarWithFilters({
   onFiltersChange,
   onSearch,
   labels,
+  filterFields = [],
   isSearching,
 }: ToolbarWithFiltersProps) {
-  const handleChange = (field: keyof SearchFiltersState, value: string) => {
+  const handleChange = (field: string, value: string) => {
     onFiltersChange({
       ...filters,
       [field]: value,
     })
+  }
+
+  const renderFilterField = (field: FilterFieldConfig) => {
+    switch (field.type) {
+      case "date":
+        return (
+          <div key={field.key} className="flex flex-col gap-1">
+            <Label htmlFor={field.key} className="text-xs text-muted-foreground">
+              {field.label}
+            </Label>
+            <Input
+              id={field.key}
+              type="date"
+              value={filters[field.key] ?? ""}
+              onChange={(event) => handleChange(field.key, event.target.value)}
+            />
+          </div>
+        )
+      case "select":
+        return (
+          <div key={field.key} className="flex flex-col gap-1">
+            <Label htmlFor={field.key} className="text-xs text-muted-foreground">
+              {field.label}
+            </Label>
+            <Select
+              value={filters[field.key] ?? ""}
+              onValueChange={(value) => handleChange(field.key, value)}
+            >
+              <SelectTrigger id={field.key}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {field.options.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )
+      case "text":
+        return (
+          <div key={field.key} className="flex flex-col gap-1">
+            <Label htmlFor={field.key} className="text-xs text-muted-foreground">
+              {field.label}
+            </Label>
+            <Input
+              id={field.key}
+              type="text"
+              placeholder={field.placeholder}
+              value={filters[field.key] ?? ""}
+              onChange={(event) => handleChange(field.key, event.target.value)}
+            />
+          </div>
+        )
+      default:
+        return null
+    }
   }
 
   return (
@@ -90,52 +164,11 @@ export function ToolbarWithFilters({
         })}
       </div>
       <div className="flex w-full flex-col gap-3 md:w-auto">
-        <div className="grid gap-3 md:grid-cols-3">
-          <div className="flex flex-col gap-1">
-            <Label htmlFor="date-from" className="text-xs text-muted-foreground">
-              {labels.dateFrom}
-            </Label>
-            <Input
-              id="date-from"
-              type="date"
-              value={filters.dateFrom ?? ""}
-              onChange={(event) => handleChange("dateFrom", event.target.value)}
-            />
+        {filterFields.length > 0 && (
+          <div className={`grid gap-3 ${filterFields.length === 1 ? "md:grid-cols-1" : filterFields.length === 2 ? "md:grid-cols-2" : "md:grid-cols-3"}`}>
+            {filterFields.map(renderFilterField)}
           </div>
-          <div className="flex flex-col gap-1">
-            <Label htmlFor="date-to" className="text-xs text-muted-foreground">
-              {labels.dateTo}
-            </Label>
-            <Input
-              id="date-to"
-              type="date"
-              value={filters.dateTo ?? ""}
-              onChange={(event) => handleChange("dateTo", event.target.value)}
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <Label className="text-xs text-muted-foreground">
-              {labels.statusLabel}
-            </Label>
-            <Select
-              value={filters.status}
-              onValueChange={(value) =>
-                handleChange("status", value as SearchFiltersState["status"])
-              }
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {labels.statusOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+        )}
         <form
           onSubmit={(e) => {
             e.preventDefault()
