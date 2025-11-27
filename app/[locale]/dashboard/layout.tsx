@@ -1,6 +1,6 @@
-import { AppSidebar } from "@/components/app-sidebar"
-import { SiteHeader } from "@/components/site-header"
-import { Providers } from "@/components/providers";
+import { AppSidebar } from "@/components/dashboard/app-sidebar"
+import { SiteHeader } from "@/components/dashboard/site-header"
+import { Providers } from "@/components/common/providers";
 
 import {
   SidebarInset,

@@ -4,7 +4,7 @@ import {
   IconSettings,
   IconUsers,
 } from "@tabler/icons-react"
-import { type NavTreeItem } from "@/components/nav-tree"
+import { type NavTreeItem } from "@/components/dashboard/nav-tree"
 
 type NavConfigItem = {
   titleKey: string

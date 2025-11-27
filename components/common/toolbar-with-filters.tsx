@@ -136,22 +136,33 @@ export function ToolbarWithFilters({
             </Select>
           </div>
         </div>
-        <div className="flex flex-col gap-2 md:flex-row md:items-center">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            onSearch()
+          }}
+          className="flex flex-col gap-2 md:flex-row md:items-center"
+        >
           <Input
             placeholder={labels.keywordPlaceholder}
             value={filters.keyword}
             onChange={(event) => handleChange("keyword", event.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault()
+                onSearch()
+              }
+            }}
             className="md:min-w-[240px]"
           />
           <Button
-            type="button"
+            type="submit"
             className="md:w-auto"
-            onClick={onSearch}
             disabled={isSearching}
           >
             {labels.search}
           </Button>
-        </div>
+        </form>
       </div>
     </div>
   )

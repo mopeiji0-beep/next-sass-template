@@ -2,7 +2,7 @@
 import Image from "next/image";
 import { use } from 'react';
 import { useTranslations } from 'next-intl';
-import { LocaleSwitcher } from "@/components/locale-switcher";
+import { LocaleSwitcher } from "@/components/common/locale-switcher";
 
 export default function Home({
   params

@@ -2,9 +2,9 @@
 
 import * as React from "react"
 import { trpc } from "@/lib/trpc/client"
-import { ChartAreaInteractive } from "@/components/chart-area-interactive"
-import { DataTable } from "@/components/data-table"
-import { SectionCards } from "@/components/section-cards"
+import { ChartAreaInteractive } from "@/components/common/chart-area-interactive"
+import { DataTable } from "@/components/common/data-table"
+import { SectionCards } from "@/components/common/section-cards"
 import { Skeleton } from "@/components/ui/skeleton"
 
 import data from "./data.json"

@@ -94,6 +94,7 @@ export function UserManagementDrawer({
     if (userData && open) {
       setName(userData.name)
       setEmail(userData.email)
+      // 编辑用户时不显示密码字段
       setPassword("")
       setConfirmPassword("")
     } else if (!userId && open) {
@@ -104,34 +105,29 @@ export function UserManagementDrawer({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (password && password !== confirmPassword) {
-      toast.error(tErrors("passwordMismatch"))
-      return
-    }
+    if (!userId) {
+      // Create user - 创建用户时需要密码
+      if (password && password !== confirmPassword) {
+        toast.error(tErrors("passwordMismatch"))
+        return
+      }
 
-    if (password && password.length < 6) {
-      toast.error(tErrors("passwordTooShort"))
-      return
-    }
-
-    if (userId) {
-      // Update user
-      updateUserMutation.mutate({
-        id: userId,
-        name,
-        email,
-        ...(password ? { password } : {}),
-      })
-    } else {
-      // Create user
-      if (!password) {
+      if (!password || password.length < 6) {
         toast.error(tErrors("passwordTooShort"))
         return
       }
+
       createUserMutation.mutate({
         name,
         email,
         password,
+      })
+    } else {
+      // Update user - 编辑用户时不修改密码和邮箱
+      updateUserMutation.mutate({
+        id: userId,
+        name,
+        // email 不可修改，不传递
       })
     }
   }
@@ -148,7 +144,7 @@ export function UserManagementDrawer({
               {userId ? t("editUser") : t("addUser")}
             </SheetDescription>
           </SheetHeader>
-          <div className="space-y-4 py-4 pr-1">
+          <div className="space-y-4 py-4 px-4">
             {isLoadingData ? (
               <>
                 <Skeleton className="h-10 w-full" />
@@ -176,34 +172,35 @@ export function UserManagementDrawer({
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    disabled={createUserMutation.isPending || updateUserMutation.isPending}
+                    disabled={!!userId || createUserMutation.isPending || updateUserMutation.isPending}
+                    readOnly={!!userId}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">
-                    {t("password")} {userId && ` (${t("leaveEmptyToKeep")})`}
-                  </Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required={!userId}
-                    disabled={createUserMutation.isPending || updateUserMutation.isPending}
-                  />
-                </div>
-                {password && (
-                  <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">{t("confirmPassword")}</Label>
-                    <Input
-                      id="confirmPassword"
-                      type="password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      required={!!password}
-                      disabled={createUserMutation.isPending || updateUserMutation.isPending}
-                    />
-                  </div>
+                {!userId && (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="password">{t("password")}</Label>
+                      <Input
+                        id="password"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        disabled={createUserMutation.isPending || updateUserMutation.isPending}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="confirmPassword">{t("confirmPassword")}</Label>
+                      <Input
+                        id="confirmPassword"
+                        type="password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        required
+                        disabled={createUserMutation.isPending || updateUserMutation.isPending}
+                      />
+                    </div>
+                  </>
                 )}
               </>
             )}

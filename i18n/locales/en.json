@@ -30,8 +30,6 @@
       "userManagement": "User Management"
     },
     "userManagement": {
-      "title": "User Management",
-      "description": "Manage users in the system",
       "addUser": "Add User",
       "editUser": "Edit User",
       "deleteUser": "Delete User",
@@ -82,11 +80,47 @@
       "next": "Next",
       "loading": "Loading...",
       "leaveEmptyToKeep": "Leave empty to keep unchanged",
+      "changePassword": "Change Password",
+      "newPassword": "New Password",
+      "passwordPlaceholder": "Enter new password",
+      "confirmPasswordPlaceholder": "Confirm new password",
+      "changePasswordSuccess": "Password changed successfully",
       "errors": {
         "deleteSelf": "Cannot delete your own account",
         "disableSelf": "Cannot disable your own account",
         "userNotFound": "User not found",
-        "emailInUse": "Email already in use"
+        "emailInUse": "Email already in use",
+        "changePasswordFailed": "Failed to change password"
+      }
+    },
+    "settings": {
+      "title": "Settings",
+      "confirmPassword": "Confirm Password",
+      "changePasswordDescription": "Set a new password for the selected user",
+      "description": "Manage your account settings",
+      "accountInfo": "Account Information",
+      "accountInfoDescription": "Update your account information",
+      "name": "Name",
+      "email": "Email",
+      "password": "Password",
+      "passwordDescription": "Change your login password",
+      "changePassword": "Change Password",
+      "changePasswordPageDescription": "Enter your current password and new password",
+      "currentPassword": "Current Password",
+      "currentPasswordPlaceholder": "Enter current password",
+      "newPassword": "New Password",
+      "newPasswordPlaceholder": "Enter new password (at least 6 characters)",
+      "confirmPasswordPlaceholder": "Confirm new password",
+      "save": "Save",
+      "saving": "Saving...",
+      "cancel": "Cancel",
+      "updateSuccess": "Updated successfully",
+      "changePasswordSuccess": "Password changed successfully",
+      "errors": {
+        "emailInUse": "Email already in use",
+        "incorrectCurrentPassword": "Current password is incorrect",
+        "changePasswordFailed": "Failed to change password",
+        "currentPasswordRequired": "Current password is required"
       }
     },
     "cards": {

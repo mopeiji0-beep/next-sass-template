@@ -14,8 +14,9 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { UserManagementDrawer } from "@/components/user-management-drawer"
-import { ToolbarWithFilters, type SearchFiltersState, type ToolbarButtonConfig, type StatusOption } from "@/components/toolbar-with-filters"
+import { UserManagementDrawer } from "@/components/user/user-management-drawer"
+import { ChangePasswordDialog } from "@/components/user/change-password-dialog"
+import { ToolbarWithFilters, type SearchFiltersState, type ToolbarButtonConfig, type StatusOption } from "@/components/common/toolbar-with-filters"
 import {
   IconPlus,
   IconEdit,
@@ -23,8 +24,8 @@ import {
   IconUserCheck,
   IconUserX,
   IconRefresh,
-  IconArrowsLeftRight,
   IconLoader2,
+  IconKey,
 } from "@tabler/icons-react"
 import { toast } from "sonner"
 
@@ -40,6 +41,8 @@ export default function UsersPage() {
   const [page, setPage] = React.useState(1)
   const [drawerOpen, setDrawerOpen] = React.useState(false)
   const [editingUser, setEditingUser] = React.useState<string | null>(null)
+  const [changePasswordOpen, setChangePasswordOpen] = React.useState(false)
+  const [changingPasswordUserId, setChangingPasswordUserId] = React.useState<string | null>(null)
   const [filters, setFilters] = React.useState<SearchFiltersState>(defaultFilters)
   const [appliedFilters, setAppliedFilters] = React.useState<SearchFiltersState>(defaultFilters)
 
@@ -98,6 +101,17 @@ export default function UsersPage() {
     refetch()
   }
 
+  const handleChangePassword = (id: string) => {
+    setChangingPasswordUserId(id)
+    setChangePasswordOpen(true)
+  }
+
+  const handleChangePasswordClose = () => {
+    setChangePasswordOpen(false)
+    setChangingPasswordUserId(null)
+    refetch()
+  }
+
   const handleSearch = () => {
     setPage(1)
     setAppliedFilters(filters)
@@ -116,21 +130,7 @@ export default function UsersPage() {
       label: t("actionsBar.create"),
       icon: IconPlus,
       onClick: handleAdd,
-    },
-    {
-      key: "delete",
-      label: t("actionsBar.delete"),
-      variant: "secondary",
-      icon: IconTrash,
-      onClick: () => toast.info(t("featureComingSoon")),
-    },
-    {
-      key: "transfer",
-      label: t("actionsBar.transfer"),
-      variant: "secondary",
-      icon: IconArrowsLeftRight,
-      onClick: () => toast.info(t("featureComingSoon")),
-    },
+    }
   ]
 
   const statusOptions: StatusOption[] = [
@@ -175,12 +175,6 @@ export default function UsersPage() {
 
   return (
     <div className="flex flex-col gap-4 p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">{t("title")}</h1>
-          <p className="text-muted-foreground">{t("description")}</p>
-        </div>
-      </div>
 
       <ToolbarWithFilters
         buttons={toolbarButtons}
@@ -235,8 +229,17 @@ export default function UsersPage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleEdit(user.id)}
+                        title={t("edit")}
                       >
                         <IconEdit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleChangePassword(user.id)}
+                        title={t("changePassword")}
+                      >
+                        <IconKey className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"
@@ -254,6 +257,7 @@ export default function UsersPage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDelete(user.id)}
+                        title={t("delete")}
                       >
                         <IconTrash className="h-4 w-4" />
                       </Button>
@@ -298,6 +302,15 @@ export default function UsersPage() {
         userId={editingUser}
         onSuccess={handleDrawerClose}
       />
+
+      {changingPasswordUserId && (
+        <ChangePasswordDialog
+          open={changePasswordOpen}
+          onOpenChange={setChangePasswordOpen}
+          userId={changingPasswordUserId}
+          onSuccess={handleChangePasswordClose}
+        />
+      )}
     </div>
   )
 }

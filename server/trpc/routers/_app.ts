@@ -423,12 +423,12 @@ export const appRouter = router({
       z.object({
         id: z.string(),
         name: z.string().min(1).optional(),
-        email: z.string().email().optional(),
+        // email 不允许修改，已从输入中移除
         password: z.string().min(6).optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { id, name, email, password } = input;
+      const { id, name, password } = input;
 
       // Check if user exists
       const existingUser = await ctx.db
@@ -444,26 +444,9 @@ export const appRouter = router({
         });
       }
 
-      // Check if email is being changed and if it's already taken
-      if (email && email !== existingUser[0].email) {
-        const emailTaken = await ctx.db
-          .select()
-          .from(users)
-          .where(eq(users.email, email))
-          .limit(1);
-
-        if (emailTaken.length > 0) {
-          throw new TRPCError({
-            code: "CONFLICT",
-            message: "Email already in use",
-          });
-        }
-      }
-
-      // Prepare update data
+      // Prepare update data - email 不允许修改
       const updateData: {
         name?: string;
-        email?: string;
         password?: string;
         updatedAt?: Date;
       } = {
@@ -471,7 +454,7 @@ export const appRouter = router({
       };
 
       if (name) updateData.name = name;
-      if (email) updateData.email = email;
+      // email 不允许修改，即使传递了也不会更新
       if (password) {
         updateData.password = await bcrypt.hash(password, 10);
       }
@@ -561,6 +544,150 @@ export const appRouter = router({
         id: String(updatedUser[0].id),
         isActive: updatedUser[0].isActive === "true",
       };
+    }),
+
+  // Change user password (admin function)
+  changeUserPassword: protectedProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+        password: z.string().min(6),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { userId, password } = input;
+
+      // Check if user exists
+      const existingUser = await ctx.db
+        .select()
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
+
+      if (existingUser.length === 0) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "User not found",
+        });
+      }
+
+      // Hash new password
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Update user password
+      await ctx.db
+        .update(users)
+        .set({
+          password: hashedPassword,
+          updatedAt: new Date(),
+        })
+        .where(eq(users.id, userId));
+
+      return { success: true };
+    }),
+
+  // Update current user profile
+  updateCurrentUser: protectedProcedure
+    .input(
+      z.object({
+        name: z.string().min(1).optional(),
+        // email 不允许修改，已从输入中移除
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.session.user?.id) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Not authenticated",
+        });
+      }
+
+      const { name } = input;
+
+      // Prepare update data - email 不允许修改
+      const updateData: {
+        name?: string;
+        updatedAt?: Date;
+      } = {
+        updatedAt: new Date(),
+      };
+
+      if (name) updateData.name = name;
+      // email 不允许修改，即使传递了也不会更新
+
+      // Update user
+      const updatedUser = await ctx.db
+        .update(users)
+        .set(updateData)
+        .where(eq(users.id, ctx.session.user.id))
+        .returning();
+
+      return {
+        id: String(updatedUser[0].id),
+        name: updatedUser[0].name,
+        email: updatedUser[0].email,
+        image: updatedUser[0].image || null,
+      };
+    }),
+
+  // Change current user password
+  changeCurrentUserPassword: protectedProcedure
+    .input(
+      z.object({
+        currentPassword: z.string().min(1),
+        newPassword: z.string().min(6),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.session.user?.id) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Not authenticated",
+        });
+      }
+
+      const { currentPassword, newPassword } = input;
+
+      // Get current user
+      const user = await ctx.db
+        .select()
+        .from(users)
+        .where(eq(users.id, ctx.session.user.id))
+        .limit(1);
+
+      if (user.length === 0) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "User not found",
+        });
+      }
+
+      // Verify current password
+      const isPasswordValid = await bcrypt.compare(
+        currentPassword,
+        user[0].password
+      );
+
+      if (!isPasswordValid) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Current password is incorrect",
+        });
+      }
+
+      // Hash new password
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+      // Update user password
+      await ctx.db
+        .update(users)
+        .set({
+          password: hashedPassword,
+          updatedAt: new Date(),
+        })
+        .where(eq(users.id, ctx.session.user.id));
+
+      return { success: true };
     }),
 });
 

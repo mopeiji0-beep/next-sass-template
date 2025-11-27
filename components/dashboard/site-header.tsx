@@ -5,7 +5,7 @@ import { usePathname } from "@/i18n/navigation"
 import { useTranslations } from "next-intl"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { LocaleSwitcher } from "@/components/locale-switcher"
+import { LocaleSwitcher } from "@/components/common/locale-switcher"
 import { getNavItems, findNavItemByPath } from "@/lib/nav-config"
 
 export function SiteHeader() {

@@ -7,8 +7,8 @@ import {
   IconInnerShadowTop,
 } from "@tabler/icons-react"
 
-import { NavTree } from "@/components/nav-tree"
-import { NavUser } from "@/components/nav-user"
+import { NavTree } from "@/components/dashboard/nav-tree"
+import { NavUser } from "@/components/dashboard/nav-user"
 import { Skeleton } from "@/components/ui/skeleton"
 import { getNavItems } from "@/lib/nav-config"
 import {
